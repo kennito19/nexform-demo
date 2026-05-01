@@ -27,8 +27,6 @@ use NexForm\Validator;
 // -------------------------------------------------------
 
 header('Content-Type: application/json; charset=UTF-8');
-if (session_status() === PHP_SESSION_NONE) session_start();
-
 function jsonResponse(bool $success, string $message, array $errors = [], int $code = 200): never
 {
     http_response_code($code);

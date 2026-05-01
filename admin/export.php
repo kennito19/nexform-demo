@@ -9,8 +9,6 @@ require_once dirname(__DIR__) . '/nexform/autoload.php';
 
 use NexForm\Database;
 
-session_start();
-
 if (empty($_SESSION['nf_admin'])) {
     http_response_code(403);
     exit('Forbidden');

@@ -9,8 +9,6 @@ require_once dirname(__DIR__) . '/nexform/autoload.php';
 
 use NexForm\Database;
 
-session_start();
-
 // ----- Auth -----
 $error = '';
 if (isset($_POST['nf_admin_login'])) {
