@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NexForm Documentation – Advanced Ajax PHP Form Builder</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#6366f1;--primary-d:#4f46e5;--dark:#0f172a;--text:#1e293b;--muted:#64748b;--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--code-bg:#1e293b;--code-text:#e2e8f0;--sidebar:260px}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{width:var(--sidebar);background:var(--dark);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;padding:0 0 40px}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.sidebar-logo strong{color:#fff;font-size:1.1rem;font-weight:800}
+.sidebar-logo span{font-size:.7rem;color:#6366f1;font-weight:700;background:#1e1b4b;border-radius:4px;padding:2px 7px}
+.sidebar nav{padding:16px 0}
+.sidebar-section{padding:8px 20px 4px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;margin-top:12px}
+.sidebar a{display:block;padding:8px 20px;color:rgba(255,255,255,.6);text-decoration:none;font-size:.86rem;border-left:3px solid transparent;transition:all .15s}
+.sidebar a:hover{color:#fff;background:rgba(255,255,255,.06);border-left-color:rgba(99,102,241,.5)}
+.sidebar a.active{color:#a5b4fc;border-left-color:#6366f1;background:rgba(99,102,241,.1)}
+
+/* Main content */
+.main{margin-left:var(--sidebar);flex:1;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 48px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:1rem;font-weight:700;color:var(--text)}
+.topbar-links{display:flex;gap:16px}
+.topbar-links a{font-size:.82rem;color:var(--muted);text-decoration:none}
+.topbar-links a:hover{color:var(--primary)}
+.content{padding:48px;max-width:860px}
+
+/* Typography */
+h2{font-size:1.7rem;font-weight:800;color:var(--dark);margin:56px 0 12px;padding-top:24px;letter-spacing:-.02em;border-bottom:2px solid var(--border);padding-bottom:12px}
+h2:first-child{margin-top:0}
+h3{font-size:1.15rem;font-weight:700;color:var(--dark);margin:36px 0 10px}
+h4{font-size:.95rem;font-weight:700;color:var(--dark);margin:24px 0 8px}
+p{margin-bottom:14px;color:var(--text)}
+ul,ol{margin:0 0 16px 22px}
+li{margin-bottom:6px;font-size:.94rem}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{font-weight:700}
+
+/* Code */
+pre{background:var(--code-bg);border-radius:10px;padding:20px 22px;overflow-x:auto;margin:18px 0;border:1px solid rgba(255,255,255,.06)}
+pre code{font-family:'Fira Code','Cascadia Code',Consolas,monospace;font-size:.84rem;color:var(--code-text);line-height:1.7}
+code:not(pre code){background:#f1f5f9;color:#4f46e5;padding:2px 7px;border-radius:5px;font-size:.84rem;font-family:monospace}
+
+/* Callouts */
+.note,.warning,.tip{border-radius:10px;padding:16px 20px;margin:20px 0;border-left:4px solid;font-size:.9rem;line-height:1.6}
+.note{background:#eff6ff;border-color:#3b82f6;color:#1e40af}
+.warning{background:#fff7ed;border-color:#f97316;color:#9a3412}
+.tip{background:#f0fdf4;border-color:#22c55e;color:#166534}
+.note strong,.warning strong,.tip strong{display:block;margin-bottom:4px;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.88rem}
+th{text-align:left;padding:10px 14px;background:#f8fafc;border-bottom:2px solid var(--border);font-weight:700;color:var(--dark)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+
+/* Steps */
+.steps{counter-reset:step;list-style:none;margin:0 0 20px}
+.steps li{counter-increment:step;display:flex;gap:16px;margin-bottom:16px;align-items:flex-start}
+.steps li::before{content:counter(step);background:var(--primary);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;margin-top:2px}
+
+/* Badges */
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.72rem;font-weight:700}
+.badge-blue{background:#e0e7ff;color:#4f46e5}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b}
+
+/* Feature grid */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.feat-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;gap:12px;align-items:flex-start}
+.feat-item .icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
+.feat-item h4{margin:0 0 3px;font-size:.88rem}
+.feat-item p{margin:0;font-size:.8rem;color:var(--muted)}
+
+/* Version history */
+.changelog-item{border-left:3px solid var(--primary);padding-left:16px;margin-bottom:24px}
+.changelog-item h4{font-size:.95rem;margin-bottom:6px}
+.changelog-item ul{margin-bottom:0}
+.changelog-item li{font-size:.85rem}
+
+/* Responsive */
+@media(max-width:860px){
+    .sidebar{transform:translateX(-100%)}
+    .main{margin-left:0}
+    .content{padding:24px 20px}
+    .feat-grid{grid-template-columns:1fr}
+    .topbar{padding:14px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ====== SIDEBAR ====== -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <strong>NexForm</strong>
+        <span>v1.0</span>
+    </div>
+    <nav>
+        <div class="sidebar-section">Getting Started</div>
+        <a href="#introduction">Introduction</a>
+        <a href="#requirements">Requirements</a>
+        <a href="#installation">Installation</a>
+        <a href="#configuration">Configuration</a>
+
+        <div class="sidebar-section">Core Usage</div>
+        <a href="#builder-api">Builder API</a>
+        <a href="#field-types">Field Types</a>
+        <a href="#validation">Validation Rules</a>
+        <a href="#filters">Filters</a>
+
+        <div class="sidebar-section">Advanced Features</div>
+        <a href="#themes">Themes</a>
+        <a href="#multistep">Multi-Step Forms</a>
+        <a href="#conditional">Conditional Logic</a>
+        <a href="#file-upload">File Uploads</a>
+        <a href="#captcha">Spam Protection</a>
+        <a href="#autoresponder">Auto-Responder</a>
+        <a href="#database">Database Storage</a>
+        <a href="#rate-limiting">Rate Limiting</a>
+
+        <div class="sidebar-section">Admin & Email</div>
+        <a href="#admin-panel">Admin Panel</a>
+        <a href="#csv-export">CSV Export</a>
+        <a href="#email-smtp">Email & SMTP</a>
+
+        <div class="sidebar-section">JavaScript</div>
+        <a href="#js-api">JS API</a>
+        <a href="#js-events">Callbacks & Events</a>
+
+        <div class="sidebar-section">Reference</div>
+        <a href="#file-structure">File Structure</a>
+        <a href="#faq">FAQ</a>
+        <a href="#changelog">Changelog</a>
+    </nav>
+</aside>
+
+<!-- ====== MAIN ====== -->
+<main class="main">
+    <div class="topbar">
+        <h1>NexForm Documentation</h1>
+        <div class="topbar-links">
+            <a href="../index.php">Live Demo</a>
+            <a href="../admin/">Admin Panel</a>
+            <a href="../examples/contact.php">Contact Form</a>
+        </div>
+    </div>
+
+    <div class="content">
+
+<!-- ================================================================
+     INTRODUCTION
+================================================================ -->
+<h2 id="introduction">Introduction</h2>
+
+<p><strong>NexForm</strong> is a powerful, responsive Ajax PHP form builder that you can embed into any web page in minutes. It ships with four stunning themes, a multi-step wizard engine, conditional field logic, drag-and-drop file uploads, built-in spam protection, zero-config SQLite storage, and a password-protected admin panel.</p>
+
+<div class="feat-grid">
+    <div class="feat-item"><div class="icon">🧙</div><div><h4>Multi-Step Wizard</h4><p>Split long forms into steps with animated progress bars and back/next navigation.</p></div></div>
+    <div class="feat-item"><div class="icon">🎨</div><div><h4>4 Beautiful Themes</h4><p>Light, Dark, Material Design, and Glassmorphism – all via CSS custom properties.</p></div></div>
+    <div class="feat-item"><div class="icon">👁</div><div><h4>Conditional Logic</h4><p>Show or hide fields dynamically based on the value of other fields.</p></div></div>
+    <div class="feat-item"><div class="icon">📁</div><div><h4>Drag & Drop Uploads</h4><p>Secure file upload with MIME validation, size limits, and inline preview.</p></div></div>
+    <div class="feat-item"><div class="icon">🛡</div><div><h4>3 Captcha Modes</h4><p>Honeypot, reCAPTCHA v2 checkbox, reCAPTCHA v3 invisible – one config line.</p></div></div>
+    <div class="feat-item"><div class="icon">📊</div><div><h4>Admin Panel + CSV</h4><p>Browse, filter, delete submissions. Export any form to CSV for Excel.</p></div></div>
+</div>
+
+<!-- ================================================================
+     REQUIREMENTS
+================================================================ -->
+<h2 id="requirements">Requirements</h2>
+
+<table>
+    <thead><tr><th>Requirement</th><th>Minimum</th><th>Notes</th></tr></thead>
+    <tbody>
+        <tr><td>PHP</td><td>8.1+</td><td>Uses named arguments, match expressions, enums</td></tr>
+        <tr><td>PDO extension</td><td>Any</td><td>Bundled with PHP – always available</td></tr>
+        <tr><td>SQLite3 extension</td><td>Any</td><td>For zero-config storage; MySQL is also supported</td></tr>
+        <tr><td>FileInfo extension</td><td>Any</td><td>For MIME type validation on uploads</td></tr>
+        <tr><td>Web server</td><td>Apache / Nginx</td><td>IIS also works; disable .htaccess on IIS (use web.config)</td></tr>
+        <tr><td>mail() or SMTP</td><td>Either</td><td>Needed to send notification and auto-responder emails</td></tr>
+    </tbody>
+</table>
+
+<div class="note"><strong>Note</strong>If you have cPanel hosting (most shared hosts), all requirements above are met by default. No additional libraries or Composer packages are required.</div>
+
+<!-- ================================================================
+     INSTALLATION
+================================================================ -->
+<h2 id="installation">Installation</h2>
+
+<ol class="steps">
+    <li><strong>Upload files.</strong> Upload the entire <code>nexform/</code> folder (the product root) to your web server. Any directory works, e.g. <code>/public_html/nexform/</code> or <code>/public_html/contact/</code>.</li>
+    <li><strong>Set permissions.</strong> Make the <code>uploads/</code> and <code>data/</code> directories writable by the server (chmod 755 or 775):
+        <pre><code>chmod 755 uploads/
+chmod 755 data/</code></pre>
+    </li>
+    <li><strong>Edit config.php.</strong> Open <code>config.php</code> in a text editor and set your email address, SMTP credentials (optional), admin password, and captcha mode.</li>
+    <li><strong>Visit your site.</strong> Open the URL in a browser. The contact form should be working immediately. SQLite database is created automatically on first submission.</li>
+    <li><strong>Access the admin panel</strong> at <code>yoursite.com/nexform/admin/</code> using the password you set in <code>config.php</code>.</li>
+</ol>
+
+<div class="tip"><strong>Tip – Embed in an existing page</strong>You can use any example as a starting point. Copy one of the example PHP files to your project, include <code>config.php</code> and <code>nexform/autoload.php</code>, render the form, and add the CSS/JS links.</div>
+
+<!-- ================================================================
+     CONFIGURATION
+================================================================ -->
+<h2 id="configuration">Configuration</h2>
+
+<p>All settings live in <code>config.php</code> in the project root. Open it and edit the <code>define()</code> calls.</p>
+
+<h3>Mail Settings</h3>
+<pre><code>// Recipient – who receives new submissions
+define('NF_MAIL_TO',         'you@yourdomain.com');
+
+// From name shown in the email
+define('NF_MAIL_FROM_NAME',  'My Site Contact');
+
+// From address (must be valid on your server)
+define('NF_MAIL_FROM_EMAIL', 'noreply@yourdomain.com');
+
+// Transport: 'mail' (default) or 'smtp'
+define('NF_MAIL_TRANSPORT',  'mail');</code></pre>
+
+<h3>SMTP Settings</h3>
+<pre><code>define('NF_MAIL_TRANSPORT',  'smtp');
+define('NF_SMTP_HOST',       'smtp.gmail.com');
+define('NF_SMTP_PORT',       587);
+define('NF_SMTP_ENCRYPTION', 'tls');   // 'tls' or 'ssl'
+define('NF_SMTP_USERNAME',   'you@gmail.com');
+define('NF_SMTP_PASSWORD',   'your-app-password');</code></pre>
+
+<div class="warning"><strong>Gmail Users</strong>Use an App Password, not your Gmail login password. Enable 2-Step Verification in your Google Account, then generate an App Password at <em>myaccount.google.com → Security → App Passwords</em>.</div>
+
+<h3>Admin Password</h3>
+<pre><code>define('NF_ADMIN_PASSWORD', 'changeme123');   // change this!</code></pre>
+
+<h3>Complete Config Reference</h3>
+<table>
+    <thead><tr><th>Constant</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>NF_MAIL_TO</code></td><td><em>you@example.com</em></td><td>Notification recipient email(s), comma-separated for multiple</td></tr>
+        <tr><td><code>NF_MAIL_FROM_NAME</code></td><td><em>NexForm Contact</em></td><td>From name in notification emails</td></tr>
+        <tr><td><code>NF_MAIL_FROM_EMAIL</code></td><td><em>noreply@yourdomain.com</em></td><td>From email address</td></tr>
+        <tr><td><code>NF_MAIL_SUBJECT_PREFIX</code></td><td><em>[NexForm]</em></td><td>Subject line prefix</td></tr>
+        <tr><td><code>NF_MAIL_TRANSPORT</code></td><td><em>mail</em></td><td><code>mail</code> or <code>smtp</code></td></tr>
+        <tr><td><code>NF_SMTP_HOST</code></td><td>—</td><td>SMTP server hostname</td></tr>
+        <tr><td><code>NF_SMTP_PORT</code></td><td><em>587</em></td><td>SMTP port (587 for TLS, 465 for SSL)</td></tr>
+        <tr><td><code>NF_SMTP_ENCRYPTION</code></td><td><em>tls</em></td><td><code>tls</code> or <code>ssl</code></td></tr>
+        <tr><td><code>NF_SMTP_USERNAME</code></td><td>—</td><td>SMTP login username</td></tr>
+        <tr><td><code>NF_SMTP_PASSWORD</code></td><td>—</td><td>SMTP login password</td></tr>
+        <tr><td><code>NF_AUTORESPONDER_ENABLED</code></td><td><em>true</em></td><td>Send auto-reply to the visitor</td></tr>
+        <tr><td><code>NF_AUTORESPONDER_EMAIL_FIELD</code></td><td><em>email</em></td><td>Form field name that contains visitor's email</td></tr>
+        <tr><td><code>NF_AUTORESPONDER_SUBJECT</code></td><td>—</td><td>Auto-reply subject line</td></tr>
+        <tr><td><code>NF_AUTORESPONDER_MESSAGE</code></td><td>—</td><td>Auto-reply HTML body</td></tr>
+        <tr><td><code>NF_DB_ENABLED</code></td><td><em>true</em></td><td>Save submissions to database</td></tr>
+        <tr><td><code>NF_DB_DRIVER</code></td><td><em>sqlite</em></td><td><code>sqlite</code> or <code>mysql</code></td></tr>
+        <tr><td><code>NF_DB_SQLITE_PATH</code></td><td><em>data/nexform.db</em></td><td>SQLite file path</td></tr>
+        <tr><td><code>NF_CAPTCHA_MODE</code></td><td><em>honeypot</em></td><td><code>none</code>, <code>honeypot</code>, <code>recaptcha_v2</code>, <code>recaptcha_v3</code></td></tr>
+        <tr><td><code>NF_RECAPTCHA_SITE_KEY</code></td><td>—</td><td>Google reCAPTCHA site key</td></tr>
+        <tr><td><code>NF_RECAPTCHA_SECRET_KEY</code></td><td>—</td><td>Google reCAPTCHA secret key</td></tr>
+        <tr><td><code>NF_RECAPTCHA_V3_SCORE</code></td><td><em>0.5</em></td><td>Minimum v3 score (0.0–1.0)</td></tr>
+        <tr><td><code>NF_RATE_LIMIT_ENABLED</code></td><td><em>true</em></td><td>Enable IP rate limiting</td></tr>
+        <tr><td><code>NF_RATE_LIMIT_MAX</code></td><td><em>5</em></td><td>Max submissions per window</td></tr>
+        <tr><td><code>NF_RATE_LIMIT_WINDOW</code></td><td><em>600</em></td><td>Window in seconds (10 min)</td></tr>
+        <tr><td><code>NF_UPLOAD_ENABLED</code></td><td><em>true</em></td><td>Allow file uploads</td></tr>
+        <tr><td><code>NF_UPLOAD_MAX_SIZE</code></td><td><em>5242880</em></td><td>Max upload size in bytes (5 MB)</td></tr>
+        <tr><td><code>NF_UPLOAD_ALLOWED</code></td><td><em>jpg,png,pdf…</em></td><td>Array of allowed file extensions</td></tr>
+        <tr><td><code>NF_UPLOAD_DIR</code></td><td><em>uploads/</em></td><td>Directory to store uploaded files</td></tr>
+        <tr><td><code>NF_UPLOAD_ATTACH_MAIL</code></td><td><em>true</em></td><td>Attach uploaded file to notification email</td></tr>
+        <tr><td><code>NF_ADMIN_PASSWORD</code></td><td><em>changeme123</em></td><td>Admin panel login password</td></tr>
+        <tr><td><code>NF_DEBUG</code></td><td><em>false</em></td><td>Show detailed errors (set false in production)</td></tr>
+    </tbody>
+</table>
+
+<!-- ================================================================
+     BUILDER API
+================================================================ -->
+<h2 id="builder-api">Builder API</h2>
+
+<p>NexForm uses a fluent PHP builder. Every field method returns <code>$this</code>, allowing you to chain calls to build a form in a few lines.</p>
+
+<h3>Basic Usage</h3>
+<pre><code>&lt;?php
+require_once 'config.php';
+require_once 'nexform/autoload.php';
+
+use NexForm\NexForm;
+
+$form = new NexForm('contact');       // 'contact' = form identifier (used for DB + rate limiting)
+$form->action('process.php')          // Where POST is sent
+     ->theme('nf-theme-light')        // Theme class
+     ->text('name', 'Your Name', ['rules' => ['required', 'minlen:2']])
+     ->email('email', 'Email', ['rules' => ['required', 'email']])
+     ->textarea('message', 'Message', ['rules' => ['required', 'minlen:10']])
+     ->submit('Send Message');
+
+echo $form->render();                 // Outputs the &lt;form&gt; HTML</code></pre>
+
+<h3>Constructor Options</h3>
+<pre><code>$form = new NexForm('form-id');
+$form->action('process.php')          // POST action URL
+     ->theme('nf-theme-dark')         // Theme (see Themes section)
+     ->steps(3)                        // Enable multi-step with N steps
+     ->submit('Send', '&lt;icon html&gt;')  // Button label + optional icon HTML
+     ->attr('id', 'my-form');          // Add arbitrary &lt;form&gt; attributes</code></pre>
+
+<h3>Field Options</h3>
+<p>Every field method accepts an <code>$options</code> array as its last parameter:</p>
+<table>
+    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>rules</code></td><td>array</td><td>Validation rules – see Validation section</td></tr>
+        <tr><td><code>filters</code></td><td>array</td><td>Sanitisation filters – see Filters section</td></tr>
+        <tr><td><code>placeholder</code></td><td>string</td><td>HTML placeholder attribute</td></tr>
+        <tr><td><code>help</code></td><td>string</td><td>Help text shown below the field</td></tr>
+        <tr><td><code>default</code></td><td>string</td><td>Pre-filled value</td></tr>
+        <tr><td><code>class</code></td><td>string</td><td>Extra CSS class on the field wrapper. Use <code>nf-half</code> for 50% width.</td></tr>
+        <tr><td><code>id</code></td><td>string</td><td>Override the generated element ID</td></tr>
+        <tr><td><code>step</code></td><td>int</td><td>Which step this field belongs to (multi-step forms)</td></tr>
+        <tr><td><code>show_if</code></td><td>array</td><td>Conditional logic: <code>['field_name' => 'expected_value']</code></td></tr>
+        <tr><td><code>maxlen</code></td><td>int</td><td>On textarea: enables live character counter</td></tr>
+        <tr><td><code>rows</code></td><td>int</td><td>On textarea: number of visible rows</td></tr>
+        <tr><td><code>max</code></td><td>int</td><td>On rating: maximum stars (default 5)</td></tr>
+    </tbody>
+</table>
+
+<!-- ================================================================
+     FIELD TYPES
+================================================================ -->
+<h2 id="field-types">Field Types</h2>
+
+<h3>Text Fields</h3>
+<pre><code>->text('name',    'Full Name',     ['placeholder' => 'John Smith'])
+->email('email',  'Email Address', ['rules' => ['required', 'email']])
+->tel('phone',    'Phone Number',  ['placeholder' => '+1 555 000'])
+->number('age',   'Age',           ['rules' => ['min:18', 'max:120']])
+->url('website',  'Website',       ['placeholder' => 'https://...'])
+->date('dob',     'Date of Birth')</code></pre>
+
+<h3>Textarea</h3>
+<pre><code>->textarea('message', 'Your Message', [
+    'rows'   => 6,
+    'maxlen' => 1000,   // shows live character counter
+    'rules'  => ['required', 'minlen:10'],
+])</code></pre>
+
+<h3>Select (Dropdown)</h3>
+<pre><code>->select('country', 'Country', [
+    'us'  => 'United States',
+    'gb'  => 'United Kingdom',
+    'ca'  => 'Canada',
+], ['rules' => ['required']])</code></pre>
+
+<h3>Radio Buttons</h3>
+<pre><code>->radio('plan', 'Select Plan', [
+    'free'  => 'Free',
+    'pro'   => 'Pro – $29/mo',
+    'elite' => 'Elite – $99/mo',
+], ['default' => 'free'])</code></pre>
+
+<h3>Checkboxes (multi-select)</h3>
+<pre><code>->checkbox('interests', 'Your Interests', [
+    'design'  => 'UI Design',
+    'dev'     => 'Development',
+    'seo'     => 'SEO',
+])</code></pre>
+
+<h3>Toggle Switch</h3>
+<pre><code>->toggle('newsletter', 'Subscribe to newsletter', ['default' => true])
+->toggle('terms',      'I agree to the Terms of Service')</code></pre>
+
+<h3>Star Rating</h3>
+<pre><code>->rating('satisfaction', 'Rate your experience', ['max' => 5])</code></pre>
+
+<h3>File Upload</h3>
+<pre><code>->file('cv', 'Upload Your CV', [
+    'rules' => ['file_max:' . (5 * 1024 * 1024), 'file_types:pdf,doc,docx'],
+])</code></pre>
+
+<h3>Hidden Field</h3>
+<pre><code>->hidden('source', 'homepage')
+->hidden('campaign', 'summer-sale')</code></pre>
+
+<h3>Section Divider</h3>
+<pre><code>->section('Personal Details', 'Please fill in your information')</code></pre>
+
+<h3>Half-Width Layout</h3>
+<p>Add <code>'class' => 'nf-half'</code> to place two fields side-by-side:</p>
+<pre><code>->text('first_name', 'First Name', ['class' => 'nf-half'])
+->text('last_name',  'Last Name',  ['class' => 'nf-half'])</code></pre>
+
+<!-- ================================================================
+     VALIDATION
+================================================================ -->
+<h2 id="validation">Validation Rules</h2>
+
+<p>Rules are passed as a <code>rules</code> array in field options. Rules with parameters use a colon separator: <code>'minlen:8'</code>.</p>
+
+<table>
+    <thead><tr><th>Rule</th><th>Example</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>required</code></td><td><code>'required'</code></td><td>Field must not be empty</td></tr>
+        <tr><td><code>email</code></td><td><code>'email'</code></td><td>Must be a valid email address</td></tr>
+        <tr><td><code>url</code></td><td><code>'url'</code></td><td>Must be a valid URL</td></tr>
+        <tr><td><code>numeric</code></td><td><code>'numeric'</code></td><td>Must be a number</td></tr>
+        <tr><td><code>alpha</code></td><td><code>'alpha'</code></td><td>Letters only</td></tr>
+        <tr><td><code>alphanumeric</code></td><td><code>'alphanumeric'</code></td><td>Letters and numbers only</td></tr>
+        <tr><td><code>phone</code></td><td><code>'phone'</code></td><td>Valid international phone format</td></tr>
+        <tr><td><code>min:N</code></td><td><code>'min:18'</code></td><td>Numeric value must be ≥ N</td></tr>
+        <tr><td><code>max:N</code></td><td><code>'max:120'</code></td><td>Numeric value must be ≤ N</td></tr>
+        <tr><td><code>minlen:N</code></td><td><code>'minlen:8'</code></td><td>String must be at least N characters</td></tr>
+        <tr><td><code>maxlen:N</code></td><td><code>'maxlen:200'</code></td><td>String must not exceed N characters</td></tr>
+        <tr><td><code>regex:/pattern/</code></td><td><code>'regex:/^[A-Z]/'</code></td><td>Must match the given regex pattern</td></tr>
+        <tr><td><code>date:format</code></td><td><code>'date:Y-m-d'</code></td><td>Must be a valid date in the given format</td></tr>
+        <tr><td><code>in:a,b,c</code></td><td><code>'in:yes,no'</code></td><td>Value must be one of the listed options</td></tr>
+        <tr><td><code>not_in:a,b</code></td><td><code>'not_in:admin,root'</code></td><td>Value must not be in the listed options</td></tr>
+        <tr><td><code>confirmed:field</code></td><td><code>'confirmed:password'</code></td><td>Value must match the named field (for password confirm)</td></tr>
+        <tr><td><code>file_max:N</code></td><td><code>'file_max:5242880'</code></td><td>Uploaded file must not exceed N bytes</td></tr>
+        <tr><td><code>file_types:ext,…</code></td><td><code>'file_types:pdf,jpg'</code></td><td>Uploaded file extension must be in list</td></tr>
+    </tbody>
+</table>
+
+<h3>Custom Error Messages</h3>
+<p>The field <code>label</code> is automatically used in error messages. Set a clear label for best results:</p>
+<pre><code>->email('email', 'Email Address', ['rules' => ['required', 'email']])
+// Error: "Email Address must be a valid email address."</code></pre>
+
+<!-- ================================================================
+     FILTERS
+================================================================ -->
+<h2 id="filters">Filters</h2>
+
+<p>Filters sanitise the submitted value before validation and storage. Default filters applied to all fields: <code>['trim', 'strip_tags']</code>.</p>
+
+<table>
+    <thead><tr><th>Filter</th><th>Description</th></tr></thead>
+    <tbody>
+        <tr><td><code>trim</code></td><td>Remove leading/trailing whitespace</td></tr>
+        <tr><td><code>strip_tags</code></td><td>Remove HTML and PHP tags</td></tr>
+        <tr><td><code>strip_slashes</code></td><td>Remove backslashes</td></tr>
+        <tr><td><code>lowercase</code></td><td>Convert to lowercase (UTF-8 safe)</td></tr>
+        <tr><td><code>uppercase</code></td><td>Convert to uppercase</td></tr>
+        <tr><td><code>email</code></td><td>Sanitise as email address</td></tr>
+        <tr><td><code>url</code></td><td>Sanitise as URL</td></tr>
+        <tr><td><code>int</code></td><td>Cast to integer</td></tr>
+        <tr><td><code>float</code></td><td>Cast to float</td></tr>
+        <tr><td><code>html_entities</code></td><td>Encode special HTML characters</td></tr>
+        <tr><td><code>alpha</code></td><td>Remove all non-letter characters</td></tr>
+        <tr><td><code>alphanumeric</code></td><td>Remove all non-alphanumeric characters</td></tr>
+        <tr><td><code>phone</code></td><td>Keep only digits, +, -, (, ), space</td></tr>
+    </tbody>
+</table>
+
+<!-- ================================================================
+     THEMES
+================================================================ -->
+<h2 id="themes">Themes</h2>
+
+<p>Switch themes by passing a theme class to <code>->theme()</code>:</p>
+<pre><code>$form->theme('nf-theme-light');    // White, indigo accent
+$form->theme('nf-theme-dark');     // Dark navy, purple accent
+$form->theme('nf-theme-material'); // Google Material Design
+$form->theme('nf-theme-glass');    // Frosted glass / glassmorphism</code></pre>
+
+<h3>Custom Theming via CSS Variables</h3>
+<p>Every visual property is a CSS custom property. Override any variable on the theme class:</p>
+<pre><code>/* In your own stylesheet, loaded after nexform.css */
+.nf-theme-light {
+    --nf-primary:       #e11d48;   /* Rose accent */
+    --nf-primary-hover: #be123c;
+    --nf-radius:        20px;      /* More rounded */
+    --nf-bg-field:      #fdf2f8;   /* Pink-tinted inputs */
+}</code></pre>
+
+<h3>Glassmorphism Background</h3>
+<p>The glass theme requires a colorful background behind it to show the blur effect:</p>
+<pre><code>&lt;!-- Wrap the form card in a gradient container --&gt;
+&lt;div style="background: linear-gradient(135deg, #4f46e5, #7c3aed, #db2777);
+            padding: 60px 20px; min-height: 100vh;"&gt;
+    &lt;div class="nf-form-card" style="background: rgba(255,255,255,.12);
+         backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.2);"&gt;
+        &lt;?= $form->render() ?&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+<!-- ================================================================
+     MULTI-STEP
+================================================================ -->
+<h2 id="multistep">Multi-Step Forms</h2>
+
+<p>Enable multi-step mode with <code>->steps(N)</code> and mark each field with <code>'step' => N</code>:</p>
+<pre><code>$form = new NexForm('contact');
+$form->action('process.php')
+     ->steps(3)                     // 3 steps total
+
+     // Step 1
+     ->step(1, 'Personal Info')     // Creates a step heading
+     ->text('name',  'Name',   ['rules' => ['required'], 'step' => 1])
+     ->email('email','Email',  ['rules' => ['required', 'email'], 'step' => 1])
+
+     // Step 2
+     ->step(2, 'Your Message')
+     ->select('subject','Subject', [...], ['step' => 2])
+     ->textarea('message','Message', ['step' => 2])
+
+     // Step 3
+     ->step(3, 'Review & Send')
+     ->file('attachment','Attachment', ['step' => 3])
+     ->submit('Submit');</code></pre>
+
+<div class="note"><strong>Validation per step</strong>Clicking "Next" validates only the fields in the current step. Users cannot advance with errors. The final "Submit" validates everything server-side.</div>
+
+<!-- ================================================================
+     CONDITIONAL LOGIC
+================================================================ -->
+<h2 id="conditional">Conditional Field Logic</h2>
+
+<p>Use <code>'show_if'</code> to show a field only when another field has a specific value:</p>
+<pre><code>->select('contact_method', 'Preferred Contact', [
+    'email' => 'Email',
+    'phone' => 'Phone',
+    'post'  => 'Post',
+])
+
+// Only shown when contact_method === 'phone'
+->tel('phone', 'Phone Number', [
+    'show_if' => ['contact_method' => 'phone'],
+])
+
+// Only shown when contact_method === 'post'
+->textarea('address', 'Postal Address', [
+    'show_if' => ['contact_method' => 'post'],
+])</code></pre>
+
+<p>Multiple conditions can be set – all must be true for the field to show:</p>
+<pre><code>->text('vat_number', 'VAT Number', [
+    'show_if' => ['account_type' => 'business', 'country' => 'gb'],
+])</code></pre>
+
+<div class="note"><strong>Note</strong>When a hidden field has <code>required</code> in its rules, the required constraint is automatically disabled while the field is hidden to prevent phantom validation errors.</div>
+
+<!-- ================================================================
+     FILE UPLOAD
+================================================================ -->
+<h2 id="file-upload">File Uploads</h2>
+
+<h3>Enable Uploads in Config</h3>
+<pre><code>define('NF_UPLOAD_ENABLED',     true);
+define('NF_UPLOAD_MAX_SIZE',    5 * 1024 * 1024);    // 5 MB
+define('NF_UPLOAD_ALLOWED',     ['jpg','jpeg','png','pdf','doc','docx','zip']);
+define('NF_UPLOAD_DIR',         __DIR__ . '/uploads/');
+define('NF_UPLOAD_ATTACH_MAIL', true);   // Attach to notification email</code></pre>
+
+<h3>Add a File Field</h3>
+<pre><code>->file('attachment', 'Attach a File', [
+    'rules' => [
+        'file_max:' . (5 * 1024 * 1024),
+        'file_types:pdf,doc,docx,jpg,png',
+    ],
+])</code></pre>
+
+<h3>Security</h3>
+<ul>
+    <li>Uploaded files are stored with random names (prevents overwrite and path traversal)</li>
+    <li>MIME type is validated against a whitelist (prevents extension spoofing)</li>
+    <li>The <code>uploads/</code> directory has <code>.htaccess</code> blocking PHP execution</li>
+    <li>Files are stored outside web root if you set <code>NF_UPLOAD_DIR</code> to an absolute path above <code>public_html</code></li>
+</ul>
+
+<!-- ================================================================
+     CAPTCHA
+================================================================ -->
+<h2 id="captcha">Spam Protection</h2>
+
+<h3>Honeypot (Default – Recommended)</h3>
+<p>A hidden field that only bots fill in. No user interaction required. Works silently.</p>
+<pre><code>define('NF_CAPTCHA_MODE', 'honeypot');</code></pre>
+
+<h3>reCAPTCHA v2 (Checkbox)</h3>
+<pre><code>define('NF_CAPTCHA_MODE',          'recaptcha_v2');
+define('NF_RECAPTCHA_SITE_KEY',    'your-site-key');
+define('NF_RECAPTCHA_SECRET_KEY',  'your-secret-key');</code></pre>
+
+<h3>reCAPTCHA v3 (Invisible)</h3>
+<pre><code>define('NF_CAPTCHA_MODE',          'recaptcha_v3');
+define('NF_RECAPTCHA_SITE_KEY',    'your-site-key');
+define('NF_RECAPTCHA_SECRET_KEY',  'your-secret-key');
+define('NF_RECAPTCHA_V3_SCORE',    0.5);   // 0.0 = most permissive, 1.0 = most strict</code></pre>
+
+<div class="tip"><strong>Get reCAPTCHA Keys</strong>Visit <a href="https://www.google.com/recaptcha/admin">google.com/recaptcha/admin</a>, register your domain, and copy the Site Key and Secret Key into config.php.</div>
+
+<!-- ================================================================
+     AUTO-RESPONDER
+================================================================ -->
+<h2 id="autoresponder">Auto-Responder</h2>
+
+<p>When a visitor submits the form, NexForm can automatically send them a confirmation email.</p>
+
+<pre><code>define('NF_AUTORESPONDER_ENABLED',     true);
+
+// The field name in the form that holds the visitor's email
+define('NF_AUTORESPONDER_EMAIL_FIELD', 'email');
+
+define('NF_AUTORESPONDER_SUBJECT',     'Thank you for contacting us!');
+
+define('NF_AUTORESPONDER_MESSAGE', '
+&lt;p&gt;Hi there,&lt;/p&gt;
+&lt;p&gt;Thank you for getting in touch! We received your message
+and will reply within 1–2 business days.&lt;/p&gt;
+&lt;p&gt;Best regards,&lt;br&gt;The Team&lt;/p&gt;
+');</code></pre>
+
+<!-- ================================================================
+     DATABASE
+================================================================ -->
+<h2 id="database">Database Storage</h2>
+
+<h3>SQLite (Zero Config)</h3>
+<pre><code>define('NF_DB_ENABLED', true);
+define('NF_DB_DRIVER',  'sqlite');
+define('NF_DB_SQLITE_PATH', __DIR__ . '/data/nexform.db');</code></pre>
+<p>The SQLite database file is created automatically on the first submission. No setup required.</p>
+
+<h3>MySQL</h3>
+<pre><code>define('NF_DB_DRIVER',      'mysql');
+define('NF_DB_MYSQL_HOST',  'localhost');
+define('NF_DB_MYSQL_PORT',  3306);
+define('NF_DB_MYSQL_NAME',  'your_database');
+define('NF_DB_MYSQL_USER',  'db_user');
+define('NF_DB_MYSQL_PASS',  'db_password');</code></pre>
+<p>The <code>nf_submissions</code> table is created automatically on first use.</p>
+
+<h3>Database Schema</h3>
+<pre><code>CREATE TABLE nf_submissions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    form_id     VARCHAR(100) NOT NULL DEFAULT 'default',
+    fields      TEXT NOT NULL,          -- JSON encoded field values
+    ip_address  VARCHAR(45)  NOT NULL,
+    user_agent  TEXT         NOT NULL,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);</code></pre>
+
+<!-- ================================================================
+     RATE LIMITING
+================================================================ -->
+<h2 id="rate-limiting">Rate Limiting</h2>
+
+<p>Prevents spam floods by limiting submissions per IP per time window:</p>
+<pre><code>define('NF_RATE_LIMIT_ENABLED', true);
+define('NF_RATE_LIMIT_MAX',     5);     // Max 5 submissions
+define('NF_RATE_LIMIT_WINDOW',  600);   // Per 10 minutes (600 seconds)</code></pre>
+
+<p>Rate limit data is stored in <code>data/rate_limit.json</code>. The file is managed automatically and old entries are pruned on each request.</p>
+
+<!-- ================================================================
+     ADMIN PANEL
+================================================================ -->
+<h2 id="admin-panel">Admin Panel</h2>
+
+<p>Access the admin panel at: <code>yoursite.com/nexform/admin/</code></p>
+
+<ol class="steps">
+    <li>Enter the password defined in <code>NF_ADMIN_PASSWORD</code> in config.php.</li>
+    <li>Use the form filter dropdown to view submissions for a specific form only.</li>
+    <li>Click <strong>Export CSV</strong> to download all visible submissions.</li>
+    <li>Click <strong>Delete</strong> on any row to permanently remove a submission.</li>
+    <li>Click <strong>Log out</strong> to end your admin session.</li>
+</ol>
+
+<div class="warning"><strong>Security</strong>Change <code>NF_ADMIN_PASSWORD</code> from the default immediately. For extra security, consider restricting access to <code>/admin/</code> by IP address in your <code>.htaccess</code>.</div>
+
+<!-- ================================================================
+     CSV EXPORT
+================================================================ -->
+<h2 id="csv-export">CSV Export</h2>
+
+<p>Click the <strong>Export CSV</strong> button in the admin panel, or access directly:</p>
+<pre><code>yoursite.com/nexform/admin/export.php           -- All forms
+yoursite.com/nexform/admin/export.php?form_id=contact  -- Contact form only</code></pre>
+
+<p>The exported CSV includes a UTF-8 BOM for perfect Excel compatibility and contains all submission fields as columns.</p>
+
+<!-- ================================================================
+     EMAIL / SMTP
+================================================================ -->
+<h2 id="email-smtp">Email & SMTP</h2>
+
+<h3>Using PHP mail()</h3>
+<pre><code>define('NF_MAIL_TRANSPORT', 'mail');  // default</code></pre>
+<p>Works on most shared hosting environments where PHP's mail() function is configured by the server.</p>
+
+<h3>Using SMTP</h3>
+<p>SMTP gives you more reliable delivery. NexForm's built-in SMTP client handles TLS/STARTTLS and AUTH LOGIN. For complex setups (OAuth2, advanced TLS), install PHPMailer:</p>
+<pre><code>composer require phpmailer/phpmailer</code></pre>
+<p>Then replace the <code>sendSmtp()</code> method in <code>nexform/Mailer.php</code> with the PHPMailer equivalent (see the comments in the file).</p>
+
+<h3>Popular SMTP Settings</h3>
+<table>
+    <thead><tr><th>Provider</th><th>Host</th><th>Port</th><th>Encryption</th></tr></thead>
+    <tbody>
+        <tr><td>Gmail</td><td>smtp.gmail.com</td><td>587</td><td>tls</td></tr>
+        <tr><td>Outlook / 365</td><td>smtp.office365.com</td><td>587</td><td>tls</td></tr>
+        <tr><td>Yahoo</td><td>smtp.mail.yahoo.com</td><td>587</td><td>tls</td></tr>
+        <tr><td>Mailgun</td><td>smtp.mailgun.org</td><td>587</td><td>tls</td></tr>
+        <tr><td>SendGrid</td><td>smtp.sendgrid.net</td><td>587</td><td>tls</td></tr>
+        <tr><td>Brevo (Sendinblue)</td><td>smtp-relay.brevo.com</td><td>587</td><td>tls</td></tr>
+    </tbody>
+</table>
+
+<!-- ================================================================
+     JS API
+================================================================ -->
+<h2 id="js-api">JavaScript API</h2>
+
+<h3>Auto-Initialisation</h3>
+<p>Add <code>data-nexform</code> to any <code>&lt;form&gt;</code> element and it will be initialised automatically when nexform.js loads:</p>
+<pre><code>&lt;form class="nf-form nf-theme-light" data-nexform data-form-id="contact"&gt;
+    ...
+&lt;/form&gt;
+&lt;script src="assets/js/nexform.js"&gt;&lt;/script&gt;</code></pre>
+
+<h3>Manual Initialisation</h3>
+<pre><code>&lt;script src="assets/js/nexform.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+const form = new NexForm('#my-form', {
+    scrollOffset:    80,      // px above first error when auto-scrolling
+    resetOnSuccess:  true,    // reset form fields after successful submission
+});
+&lt;/script&gt;</code></pre>
+
+<h3>Multiple Forms on One Page</h3>
+<pre><code>document.querySelectorAll('.nf-form').forEach(f =&gt; new NexForm(f));</code></pre>
+
+<!-- ================================================================
+     JS EVENTS
+================================================================ -->
+<h2 id="js-events">Callbacks & Events</h2>
+
+<pre><code>const form = new NexForm('#my-form', {
+
+    // Called before the AJAX request is sent
+    // Return false to abort submission
+    beforeSubmit: function(formData) {
+        console.log('About to submit', formData);
+        // return false; // would cancel submission
+    },
+
+    // Called when the server returns success: true
+    successCallback: function(response) {
+        console.log('Success:', response.message);
+        // Redirect, show a modal, fire analytics, etc.
+        gtag('event', 'form_submit', { 'form_id': 'contact' });
+    },
+
+    // Called when the server returns success: false
+    errorCallback: function(response) {
+        console.log('Error:', response.message, response.errors);
+    },
+});</code></pre>
+
+<h3>Public Methods</h3>
+<pre><code>const nf = new NexForm('#my-form');
+
+nf.submit();   // Programmatically submit (runs validation + Ajax)
+nf.reset();    // Clear all fields, errors, and the response message</code></pre>
+
+<!-- ================================================================
+     FILE STRUCTURE
+================================================================ -->
+<h2 id="file-structure">File Structure</h2>
+
+<pre><code>nexform/
+├── config.php                  ← All user settings (edit this first)
+├── process.php                 ← AJAX form handler (do not modify)
+├── index.php                   ← Demo showcase homepage
+├── .htaccess                   ← Apache security rules
+│
+├── nexform/                    ← Core PHP library
+│   ├── autoload.php            ← PSR-4 style autoloader
+│   ├── NexForm.php             ← Main builder class
+│   ├── Validator.php           ← Server-side validation
+│   ├── Filter.php              ← Input sanitisation
+│   ├── Mailer.php              ← Email (mail / SMTP)
+│   ├── Database.php            ← SQLite / MySQL storage
+│   ├── Captcha.php             ← Honeypot / reCAPTCHA v2 / v3
+│   ├── FileHandler.php         ← Secure file upload
+│   └── RateLimiter.php         ← IP-based rate limiting
+│
+├── assets/
+│   ├── css/nexform.css         ← All styles + 4 themes
+│   └── js/nexform.js           ← Ajax, multi-step, conditional, ratings
+│
+├── examples/
+│   ├── contact.php             ← Contact form (Light theme)
+│   ├── quote.php               ← Quote request (Dark theme)
+│   ├── registration.php        ← Registration (Material theme)
+│   ├── multistep.php           ← 3-step wizard (Glass theme)
+│   └── forms/                  ← Server-side field maps per form
+│       ├── contact.php
+│       ├── quote.php
+│       └── registration.php
+│
+├── admin/
+│   ├── index.php               ← Submissions dashboard
+│   └── export.php              ← CSV export
+│
+├── uploads/                    ← Uploaded files (auto-created)
+│   └── .htaccess               ← Blocks PHP execution in this dir
+│
+└── data/                       ← SQLite DB + rate limit data (auto-created)
+</code></pre>
+
+<!-- ================================================================
+     FAQ
+================================================================ -->
+<h2 id="faq">Frequently Asked Questions</h2>
+
+<h4>Can I put multiple forms on one page?</h4>
+<p>Yes. Create multiple <code>NexForm</code> instances with different form IDs and render each. Each form manages its own CSRF token and submissions independently.</p>
+
+<h4>How do I embed the form in an existing PHP page?</h4>
+<pre><code>&lt;?php
+require_once '/path/to/nexform/config.php';
+require_once '/path/to/nexform/nexform/autoload.php';
+use NexForm\NexForm;
+$form = new NexForm('contact');
+$form->action('/path/to/nexform/process.php')
+     // ... add fields ...
+     ->submit('Send');
+echo $form->render();
+?&gt;
+&lt;!-- In &lt;head&gt;: --&gt;
+&lt;link rel="stylesheet" href="/path/to/nexform/assets/css/nexform.css"&gt;
+&lt;!-- Before &lt;/body&gt;: --&gt;
+&lt;script src="/path/to/nexform/assets/js/nexform.js"&gt;&lt;/script&gt;
+&lt;script&gt;new NexForm('.nf-form');&lt;/script&gt;</code></pre>
+
+<h4>Can I use it in a plain HTML page?</h4>
+<p>Yes. Set the form's action to <code>process.php</code>. NexForm works with JavaScript for Ajax submissions but degrades gracefully – if JS is disabled, the form submits normally to <code>process.php</code> which handles everything server-side.</p>
+
+<h4>How do I add a new form type?</h4>
+<ol class="steps">
+    <li>Create a new example page, e.g. <code>examples/survey.php</code>, with a new <code>NexForm('survey')</code> instance.</li>
+    <li>Create the field map file <code>examples/forms/survey.php</code> with the <code>$fieldMap</code> variable.</li>
+    <li>That's it — <code>process.php</code> automatically loads the field map by form ID.</li>
+</ol>
+
+<h4>How do I change the success message?</h4>
+<p>The message is returned from <code>process.php</code> – find the last line: <code>jsonResponse(true, 'Thank you! ...')</code> and change the string. You can also use the <code>successCallback</code> JS option to show a custom UI.</p>
+
+<h4>Can I store files outside public_html?</h4>
+<p>Yes. Set <code>NF_UPLOAD_DIR</code> to an absolute path outside the web root, e.g. <code>/home/user/private_uploads/</code>. Files won't be directly accessible via URL, which is safer.</p>
+
+<h4>Does it work on Windows/IIS?</h4>
+<p>Yes. Disable <code>.htaccess</code> (not supported on IIS) and use <code>web.config</code> for equivalent URL rules. SQLite and mail() work the same. Use SMTP for email on IIS environments.</p>
+
+<h4>How do I use PHPMailer instead of the built-in SMTP?</h4>
+<pre><code>// 1. Install via Composer
+composer require phpmailer/phpmailer
+
+// 2. Replace sendSmtp() in nexform/Mailer.php with:
+use PHPMailer\PHPMailer\PHPMailer;
+$mail = new PHPMailer(true);
+$mail->isSMTP();
+$mail->Host       = NF_SMTP_HOST;
+$mail->SMTPAuth   = true;
+$mail->Username   = NF_SMTP_USERNAME;
+$mail->Password   = NF_SMTP_PASSWORD;
+$mail->SMTPSecure = NF_SMTP_ENCRYPTION;
+$mail->Port       = NF_SMTP_PORT;
+$mail->setFrom(NF_MAIL_FROM_EMAIL, NF_MAIL_FROM_NAME);
+$mail->addAddress($to);
+$mail->Subject = $subject;
+$mail->isHTML(true);
+$mail->Body = $body;
+return $mail->send();</code></pre>
+
+<!-- ================================================================
+     CHANGELOG
+================================================================ -->
+<h2 id="changelog">Changelog</h2>
+
+<div class="changelog-item">
+    <h4>v1.0.0 – Initial Release</h4>
+    <ul>
+        <li>Fluent PHP builder API for all field types</li>
+        <li>4 themes: Light, Dark, Material, Glassmorphism</li>
+        <li>Multi-step wizard with animated progress bar</li>
+        <li>Conditional field logic (show/hide on field value)</li>
+        <li>Drag-and-drop file upload with preview and MIME validation</li>
+        <li>Star rating field type</li>
+        <li>Toggle switch field type</li>
+        <li>Server-side validation with 20 built-in rules</li>
+        <li>15 input sanitisation filters</li>
+        <li>Honeypot, reCAPTCHA v2 and v3 support</li>
+        <li>CSRF one-time token protection</li>
+        <li>IP-based rate limiting (flat JSON store)</li>
+        <li>Zero-config SQLite storage (MySQL also supported)</li>
+        <li>HTML email notifications with file attachments</li>
+        <li>Auto-responder email</li>
+        <li>mail() and built-in SMTP transport</li>
+        <li>Password-protected admin panel</li>
+        <li>CSV export with UTF-8 BOM for Excel</li>
+        <li>Responsive two-column grid layout</li>
+        <li>Live character counter on textarea</li>
+        <li>Progressive enhancement (works without JavaScript)</li>
+        <li>Zero external dependencies (no jQuery, no Composer required)</li>
+    </ul>
+</div>
+
+<hr style="margin:40px 0;border:none;border-top:2px solid var(--border)">
+<p style="color:var(--muted);font-size:.85rem;text-align:center">
+    NexForm v1.0 &mdash; Advanced Ajax PHP Form Builder &bull;
+    Built with PHP 8.1+ and Vanilla JavaScript &bull;
+    No jQuery &bull; No Composer required
+</p>
+
+    </div><!-- .content -->
+</main>
+
+<script>
+// Active sidebar link on scroll
+const links = document.querySelectorAll('.sidebar a');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            const id = e.target.id;
+            links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+        }
+    });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+document.querySelectorAll('h2[id]').forEach(h => observer.observe(h));
+</script>
+</body>
+</html>

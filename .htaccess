@@ -1,0 +1,25 @@
+# NexForm – Apache Security Configuration
+
+Options -Indexes
+
+# Protect the data directory
+<FilesMatch "\.(db|json)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Protect config
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Prevent access to nexform library
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^nexform/.*\.php$ - [F,L]
+    RewriteRule ^data/.*$         - [F,L]
+</IfModule>
+
+# Charset
+AddDefaultCharset UTF-8
