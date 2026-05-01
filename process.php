@@ -48,16 +48,23 @@ if (empty($formId)) {
 }
 
 // -------------------------------------------------------
-// CSRF token check
+// CSRF token check (stateless HMAC — no sessions required)
 // -------------------------------------------------------
 
 $submittedToken = $_POST['nf_token'] ?? '';
-$sessionToken   = $_SESSION['nf_token_' . $formId] ?? '';
 
-if (empty($submittedToken) || !hash_equals($sessionToken, $submittedToken)) {
+if (empty($submittedToken)) {
+    jsonResponse(false, 'Security token missing. Please refresh the page and try again.', [], 403);
+}
+
+// Accept tokens from the current hour and the previous hour (handles hour-boundary edge cases)
+$bucket       = (int) floor(time() / 3600);
+$validCurrent = hash_hmac('sha256', $formId . '|' . $bucket,       NF_SECRET_KEY);
+$validPrev    = hash_hmac('sha256', $formId . '|' . ($bucket - 1), NF_SECRET_KEY);
+
+if (!hash_equals($validCurrent, $submittedToken) && !hash_equals($validPrev, $submittedToken)) {
     jsonResponse(false, 'Security token mismatch. Please refresh the page and try again.', [], 403);
 }
-unset($_SESSION['nf_token_' . $formId]); // one-time token
 
 // -------------------------------------------------------
 // Rate limiting

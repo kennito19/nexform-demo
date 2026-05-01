@@ -439,9 +439,10 @@ class NexForm
 
     private function generateToken(): string
     {
-        $token = bin2hex(random_bytes(16));
-        $_SESSION['nf_token_' . $this->formId] = $token;
-        return $token;
+        // Stateless HMAC token — no session required.
+        // Uses a 1-hour time bucket so tokens expire automatically.
+        $bucket = (int) floor(time() / 3600);
+        return hash_hmac('sha256', $this->formId . '|' . $bucket, NF_SECRET_KEY);
     }
 
     // -------------------------------------------------------
