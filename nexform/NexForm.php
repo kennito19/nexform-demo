@@ -439,7 +439,6 @@ class NexForm
 
     private function generateToken(): string
     {
-        if (session_status() === PHP_SESSION_NONE) session_start();
         $token = bin2hex(random_bytes(16));
         $_SESSION['nf_token_' . $this->formId] = $token;
         return $token;
